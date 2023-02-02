@@ -1,0 +1,9 @@
+[Unit]
+Description=Run nginx-renew-ocsp-responses daily
+After=nginx-create-ocsp-responses.service network.target nginx.service
+
+[Timer]
+OnCalendar=daily
+
+[Install]
+WantedBy=timers.target

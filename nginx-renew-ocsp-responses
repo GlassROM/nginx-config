@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set \
+    -o errexit \
+    -o errtrace \
+    -o noglob \
+    -o nounset \
+    -o pipefail
+    IFS=$'\n\t'
+    shopt -s inherit_errexit
+
+    cd /etc/letsencrypt/ocsp-cache
+    for i in $(ls); do
+        cd $i 
+        ocsp_uri=$(openssl x509 -noout -ocsp_uri -in cert.pem)
+	echo $(date) > ocsp.log
+	echo "OCSP URI: ${ocsp_uri}"
+        openssl ocsp -no_nonce -url ${ocsp_uri} -issuer chain.pem -cert cert.pem -verify_other chain.pem -respout ocsp_tmp.der >> ocsp.log 2>&1
+        rsync -Ivt ocsp_tmp.der ocsp.der >> ocsp.log 2>&1
+        echo "Copied successfully for ${i}" >> ocsp.log 2>&1
+        rm -v ocsp_tmp.der >> ocsp.log 2>&1
+	cat ocsp.log
+	cd ..
+    done

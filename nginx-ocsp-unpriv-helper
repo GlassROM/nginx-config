@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set \
+    -o errexit \
+    -o errtrace \
+    -o noglob \
+    -o nounset \
+    -o pipefail
+    IFS=$'\n\t'
+    shopt -s inherit_errexit
+
+    echo "Copying certs, renewing OCSP response and restarting nginx"
+
+    cd /etc/letsencrypt/ocsp-cache/glassrom.pw
+    cp -vr ../../live/glassrom.pw/chain.pem ./
+    chmod 644 chain.pem
+    rm -vf ocsp.der
+    systemctl start nginx-renew-ocsp-responses.service
+    echo "Waiting for ocsp response. Please just wait (30s)"
+    sleep 30
+    cat ocsp.log
+    if [ -f ocsp.der ]; then
+        echo "OCSP response exists, restarting nginx"
+        systemctl restart nginx
+    else
+        echo "Failure getting an OCSP response"
+        exit 1
+    fi

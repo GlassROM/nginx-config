@@ -1,0 +1,38 @@
+[Unit]
+Description=Create nginx OCSP cache
+Before=nginx.service nginx-renew-ocsp-responses.service nginx-renew-ocsp-responses.timer
+After=network.target
+
+[Service]
+Type=oneshot
+User=unpriv1
+Group=unpriv1
+ExecStart=/usr/local/bin/nginx-renew-ocsp-responses
+CapabilityBoundingSet=
+LockPersonality=true
+NoNewPrivileges=true
+MemoryDenyWriteExecute=true
+PrivateIPC=true
+PrivateTmp=true
+ProcSubset=pid
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=strict
+ReadWritePaths=/etc/letsencrypt/ocsp-cache
+RemoveIPC=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@obsolete
+
+[Install]
+WantedBy=multi-user.target
